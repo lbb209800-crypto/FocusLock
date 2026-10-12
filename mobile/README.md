@@ -1,5 +1,14 @@
 # FocusLock Mobile App
 
+## Current application: scheduled focus lock
+
+The default entry point is now a local schedule app (title, date/time, five- or
+ten-minute lock), with Korean/English selection. It does not require Firebase or
+the backend. See [scheduled lock setup and limitations](../docs/SCHEDULE_LOCK.md).
+
+The sections below describe the earlier AI/auth prototype, which is retained as
+legacy code rather than the current application flow.
+
 Flutter-based AI-powered smartphone lock screen management application.
 
 ## Prerequisites
