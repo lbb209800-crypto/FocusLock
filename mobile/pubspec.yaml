@@ -11,9 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.24.0
-  firebase_auth: ^4.15.0
-  firebase_database: ^10.3.0
+  firebase_core: ^4.15.0
+  firebase_auth: ^6.7.0
+  firebase_database: ^12.6.0
   http: ^1.1.0
   provider: ^6.1.0
   shared_preferences: ^2.2.2
@@ -22,16 +22,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_linter: ^3.0.0
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/icons/
-  fonts:
-    - family: Pretendard
-      fonts:
-        - asset: assets/fonts/Pretendard-Regular.ttf
-        - asset: assets/fonts/Pretendard-Bold.ttf
-          weight: 700

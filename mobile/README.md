@@ -33,6 +33,20 @@ Edit `lib/services/ai_service.dart` and update `_baseUrl` to your backend server
 
 ## Running the App
 
+### Local UI preview (without Firebase login)
+
+From this folder on Windows:
+
+```powershell
+$env:PUB_CACHE = "$PWD\..\.tools\pub-cache"
+..\.tools\flutter\bin\flutter.bat run -d web-server --web-hostname 127.0.0.1 --web-port 8080 -t lib/preview.dart
+```
+
+Open http://127.0.0.1:8080 in a browser. This preview reuses the lock screen and
+focus timer screens without initializing Firebase. The AI preview still requires
+the backend on port 3000 and currently returns mock data. It does not lock the
+device or implement authentication or saving.
+
 ### Android
 
 ```bash

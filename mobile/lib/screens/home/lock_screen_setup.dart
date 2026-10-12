@@ -1,3 +1,4 @@
+import '../../language.dart';
 import 'package:flutter/material.dart';
 import '../../services/ai_service.dart';
 import '../../models/lock_screen.dart';
@@ -18,7 +19,7 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
   Future<void> _generateLockScreen() async {
     if (_moodController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your mood or situation')),
+        SnackBar(content: Text(context.tr('Please enter your mood or situation', '기분이나 상황을 입력해주세요'))),
       );
       return;
     }
@@ -32,17 +33,22 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
         _moodController.text,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _generatedLockScreen = lockScreen;
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(content: Text('${context.tr('Error', '오류')}: ${e.toString()}')),
       );
     } finally {
-      setState(() {
-        _isGenerating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+      }
     }
   }
 
@@ -59,8 +65,8 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Create Your Lock Screen',
+          Text(
+            context.tr('Create Your Lock Screen', '나만의 잠금 화면 만들기'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -68,8 +74,8 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Tell AI your mood or current situation',
+          Text(
+            context.tr('Tell AI your mood or current situation', 'AI에게 기분이나 현재 상황을 알려주세요'),
             style: TextStyle(
               fontSize: 12,
               color: Color(0xFFA0AEC0),
@@ -81,7 +87,7 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText:
-                  'e.g., I need to focus on work, feeling stressed, celebrating...',
+                  context.tr('e.g., I need to focus on work, feeling stressed, celebrating...', '예: 공부에 집중하고 싶어요, 스트레스를 받고 있어요...'),
               hintStyle: const TextStyle(color: Color(0xFF64748B)),
               filled: true,
               fillColor: const Color(0xFF1E293B),
@@ -117,8 +123,8 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
                         ),
                       ),
                     )
-                  : const Text(
-                      'Generate Lock Screen',
+                  : Text(
+                      context.tr('Generate Lock Screen', '잠금 화면 생성'),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -128,7 +134,7 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
             ),
           ),
           const SizedBox(height: 32),
-          if (_generatedLockScreen != null) ...
+          if (_generatedLockScreen != null)
             _buildPreview(_generatedLockScreen!),
         ],
       ),
@@ -139,8 +145,8 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Preview',
+        Text(
+          context.tr('Preview', '미리보기'),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -179,7 +185,7 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Code: ${data.bioCode}',
+                '${context.tr('Code', '코드')}: ${data.bioCode}',
                 style: const TextStyle(
                   fontSize: 12,
                   color: Color(0xFF6366F1),
@@ -195,7 +201,7 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
           child: ElevatedButton(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Lock screen saved!')),
+                SnackBar(content: Text(context.tr('Lock screen saved!', '잠금 화면 저장 기능은 준비 중이에요'))),
               );
             },
             style: ElevatedButton.styleFrom(
@@ -205,8 +211,8 @@ class _LockScreenSetupState extends State<LockScreenSetup> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Apply Lock Screen',
+            child: Text(
+              context.tr('Apply Lock Screen', '잠금 화면 적용'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

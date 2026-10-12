@@ -1,3 +1,4 @@
+import '../language.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
@@ -55,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'FocusLock',
               style: TextStyle(
                 fontSize: 32,
@@ -64,8 +65,8 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'AI-Powered Focus Assistant',
+            Text(
+              context.tr('AI-Powered Focus Assistant', 'AI 기반 집중 도우미'),
               style: TextStyle(
                 fontSize: 14,
                 color: Color(0xFFA0AEC0),

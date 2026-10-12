@@ -1,3 +1,4 @@
+import '../../language.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
@@ -63,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(actions: const [LanguageSelector()]),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -91,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                _isLoginMode ? 'Welcome Back' : 'Create Account',
+                _isLoginMode ? context.tr('Welcome Back', '다시 만나 반가워요') : context.tr('Create Account', '회원가입'),
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -102,8 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
               Text(
                 _isLoginMode
-                    ? 'Sign in to continue'
-                    : 'Join us to get started',
+                    ? context.tr('Sign in to continue', '계속하려면 로그인해주세요')
+                    : context.tr('Join us to get started', '가입하고 시작해보세요'),
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFFA0AEC0),
@@ -131,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  hintText: 'Email',
+                  hintText: context.tr('Email', '이메일'),
                   hintStyle: const TextStyle(color: Color(0xFF64748B)),
                   filled: true,
                   fillColor: const Color(0xFF1E293B),
@@ -151,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  hintText: 'Password',
+                  hintText: context.tr('Password', '비밀번호'),
                   hintStyle: const TextStyle(color: Color(0xFF64748B)),
                   filled: true,
                   fillColor: const Color(0xFF1E293B),
@@ -191,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       )
                     : Text(
-                        _isLoginMode ? 'Sign In' : 'Create Account',
+                        _isLoginMode ? context.tr('Sign In', '로그인') : context.tr('Create Account', '회원가입'),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -211,14 +213,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text.rich(
                     TextSpan(
                       text: _isLoginMode
-                          ? 'Don\'t have an account? '
-                          : 'Already have an account? ',
+                          ? context.tr("Don't have an account? ", '계정이 없으신가요? ')
+                          : context.tr('Already have an account? ', '이미 계정이 있으신가요? '),
                       style: const TextStyle(
                         color: Color(0xFFA0AEC0),
                       ),
                       children: [
                         TextSpan(
-                          text: _isLoginMode ? 'Sign Up' : 'Sign In',
+                          text: _isLoginMode ? context.tr('Sign Up', '회원가입') : context.tr('Sign In', '로그인'),
                           style: const TextStyle(
                             color: Color(0xFF6366F1),
                             fontWeight: FontWeight.bold,

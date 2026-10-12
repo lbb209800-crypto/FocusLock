@@ -1,3 +1,4 @@
+import '../../language.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -11,14 +12,12 @@ class FocusModeScreen extends StatefulWidget {
 class _FocusModeScreenState extends State<FocusModeScreen> {
   int _selectedMinutes = 5;
   bool _isActive = false;
-  late Timer _timer;
+  Timer? _timer;
   int _remainingSeconds = 0;
 
   @override
   void dispose() {
-    if (_timer.isActive) {
-      _timer.cancel();
-    }
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -33,7 +32,7 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
         if (_remainingSeconds > 0) {
           _remainingSeconds--;
         } else {
-          _timer.cancel();
+          _timer?.cancel();
           _isActive = false;
           _showFocusComplete();
         }
@@ -42,9 +41,7 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
   }
 
   void _stopFocusMode() {
-    if (_timer.isActive) {
-      _timer.cancel();
-    }
+    _timer?.cancel();
     setState(() {
       _isActive = false;
       _remainingSeconds = 0;
@@ -56,19 +53,19 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
-        title: const Text(
-          'Focus Complete!',
+        title: Text(
+          context.tr('Focus Complete!', '집중 완료!'),
           style: TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Great job! You completed your focus session.',
+        content: Text(
+          context.tr('Great job! You completed your focus session.', '잘했어요! 집중 시간을 완료했어요.'),
           style: TextStyle(color: Color(0xFFA0AEC0)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'OK',
+            child: Text(
+              context.tr('OK', '확인'),
               style: TextStyle(color: Color(0xFF6366F1)),
             ),
           ),
@@ -90,8 +87,8 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Focus Mode',
+          Text(
+            context.tr('Focus Mode', '집중 모드'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -99,15 +96,15 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Lock your phone for 3-5 minutes to stay focused',
+          Text(
+            context.tr('Lock your phone for 3-5 minutes to stay focused', '3분 또는 5분 타이머로 집중해보세요'),
             style: TextStyle(
               fontSize: 12,
               color: Color(0xFFA0AEC0),
             ),
           ),
           const SizedBox(height: 48),
-          if (!_isActive) ...
+          if (!_isActive)
             _buildModeSelector()
           else
             _buildActiveTimer(),
@@ -122,8 +119,8 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Start Focus Mode',
+              child: Text(
+                context.tr('Start Focus Mode', '집중 시작'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -141,8 +138,8 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Stop Focus Mode',
+              child: Text(
+                context.tr('Stop Focus Mode', '집중 종료'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -159,8 +156,8 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Duration',
+        Text(
+          context.tr('Select Duration', '집중 시간 선택'),
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -191,7 +188,7 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
                     ),
                   ),
                   child: Text(
-                    '$minutes min',
+                    context.tr('$minutes min', '$minutes분'),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -237,8 +234,8 @@ class _FocusModeScreenState extends State<FocusModeScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        const Text(
-          'Stay Focused!',
+        Text(
+          context.tr('Stay Focused!', '집중하고 있어요!'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

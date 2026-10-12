@@ -1,3 +1,4 @@
+import '../../language.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
-        title: const Text(
+        title: Text(
           'FocusLock',
           style: TextStyle(
             fontSize: 24,
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          const LanguageSelector(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _logout,
@@ -62,18 +64,18 @@ class _HomeScreenState extends State<HomeScreen> {
             _selectedIndex = index;
           });
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.lock),
-            label: 'Lock Screen',
+            label: context.tr('Lock Screen', '잠금 화면'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.timer),
-            label: 'Focus Mode',
+            label: context.tr('Focus Mode', '집중 모드'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: context.tr('Settings', '설정'),
           ),
         ],
       ),
@@ -86,8 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Settings',
+          Text(
+            context.tr('Settings', '설정'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -124,8 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Account',
+                      Text(
+                        context.tr('Account', '계정'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -134,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        FirebaseAuth.instance.currentUser?.email ?? 'No email',
+                        FirebaseAuth.instance.currentUser?.email ?? context.tr('No email', '이메일 없음'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFFA0AEC0),
