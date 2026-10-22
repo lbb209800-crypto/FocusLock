@@ -25,7 +25,7 @@ class AppGuardService : AccessibilityService() {
         PhoneAccess.foregroundPackage = pkg
         if (pkg == packageName || pkg == "com.android.settings") return
         if (!LockRules.redirect(LockSession.active(this) != null, PhoneAccess.yielding(this),
-            PhoneAccess.isPhonePackage(this, pkg), false,
+            PhoneAccess.isEmergencyPackage(pkg), false,
             getSystemService(KeyguardManager::class.java).isKeyguardLocked)) return
         val now = SystemClock.elapsedRealtime()
         if (now - lastRedirect < 800) return

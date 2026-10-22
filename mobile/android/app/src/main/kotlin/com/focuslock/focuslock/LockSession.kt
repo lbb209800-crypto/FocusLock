@@ -32,7 +32,6 @@ object LockSession {
         QuietMode.stop(c)
         prefs(c).edit().remove("item").commit()
         c.getSystemService(AlarmManager::class.java).cancel(expiry(c))
-        PhoneAccess.dialerUntil = 0
     }
 
     fun recover(c: Context) {

@@ -4,7 +4,7 @@ package com.focuslock.focuslock
 object LockRules {
     fun remaining(at: Long, minutes: Int, now: Long): Long = at + minutes * 60000L - now
 
-    fun redirect(active: Boolean, yieldingToPhone: Boolean, phoneWindow: Boolean,
+    fun redirect(active: Boolean, yieldingToPhone: Boolean, emergencyWindow: Boolean,
                  systemWindow: Boolean, keyguard: Boolean): Boolean =
-        active && !yieldingToPhone && !phoneWindow && !systemWindow && !keyguard
+        active && !yieldingToPhone && !emergencyWindow && !systemWindow && !keyguard
 }

@@ -73,7 +73,7 @@ overlay, telephony and notification behavior remains **unverified**.
   apps/launchers to FocusLock while a lock is active. It cannot read the view tree,
   typed text or notification contents. The app explains this before opening the
   Android accessibility settings; enabling it is the user's choice.
-- Phone/Telecom/emergency UI, Android Settings, keyguard and System UI remain
+- Ringing/ongoing calls, emergency UI, Android Settings, keyguard and System UI remain
   available. This is a stronger deterrent, not kiosk mode or a guarantee against
   force stop, uninstall, navigation, permission revocation or OEM restrictions.
 - `TelecomManager.isInCall` checks aggregate ringing/ongoing calls, including
@@ -81,9 +81,10 @@ overlay, telephony and notification behavior remains **unverified**.
   polls. Unknown/unreadable call state yields rather than obstructing the phone.
   No phone numbers, contacts, call log or audio are read.
 - The overlay hides during a call and resumes after it, using the original
-  deadline. A call lasting beyond the deadline finishes the lock. Phone UI can
-  also be opened with the overlay's phone button; leaving the phone returns to
-  app blocking. Phone/Settings exemptions are deliberate escape paths.
+  deadline. A call lasting beyond the deadline finishes the lock. The overlay
+  has no outbound calling button or dialer launch action. Opening an idle ordinary
+  phone app does not exempt it from blocking. Emergency/Settings exceptions remain;
+  this does not disable every OS outbound call path or disconnect ongoing calls.
 - On Android 10+, `QuietMode` owns one `AutomaticZenRule` with a `ZenPolicy` that
   suppresses ordinary notification sound/vibration/visual effects and allows all
   calls. Alarms/media remain allowed. It does not delete notifications or change
@@ -103,7 +104,7 @@ overlay, telephony and notification behavior remains **unverified**.
    notification shade. Record which transitions are actually prevented per device.
 3. Receive, reject and answer a real call during a lock, including a secondary SIM.
    Test a call already ringing at lock start, a call longer than the remaining lock,
-   and outbound calling. Verify emergency dialer access without placing a test
+   and confirm there is no outbound calling button or idle dialer exemption. Verify emergency dialer access without placing a test
    emergency call. Check overlay removal and original-deadline resumption.
 4. Send real ordinary notifications with sound/vibration enabled before the lock.
    Check banner, lock screen and shade behavior; compare with DND bypass enabled.

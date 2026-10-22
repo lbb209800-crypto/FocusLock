@@ -25,4 +25,14 @@ class LockRulesTest {
         assertFalse(LockRules.redirect(false, false, false, false, false))
         assertFalse(LockRules.redirect(true, false, false, true, false))
     }
+
+    @Test fun idleDialerHasNoSpecialExemption() {
+        // Without a ringing/ongoing call, opening the ordinary dialer stays blocked.
+        for (pkg in listOf("com.google.android.dialer", "com.android.dialer", "com.android.phone")) {
+            assertTrue(LockRules.redirect(true, false, PhoneAccess.isEmergencyPackage(pkg), false, false))
+        }
+        assertFalse(LockRules.redirect(true, false, PhoneAccess.isEmergencyPackage("com.android.emergency"), false, false))
+        // Incoming/ongoing calls still yield, even when the call UI belongs to the dialer.
+        assertFalse(LockRules.redirect(true, true, false, false, false))
+    }
 }

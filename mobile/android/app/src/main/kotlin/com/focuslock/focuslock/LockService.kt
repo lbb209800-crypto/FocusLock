@@ -22,7 +22,6 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.json.JSONObject
@@ -113,14 +112,6 @@ class LockService : Service() {
         timer = label("", 64f)
         label(if (korean) "전화가 오면 통화할 수 있어요. 종료 시각은 유지돼요." else
             "Calls remain available. The original end time stays the same.", 16f)
-        layout.addView(Button(this).apply {
-            text = if (korean) "전화 걸기" else "Open phone"
-            setOnClickListener {
-                hideOverlay()
-                try { PhoneAccess.openDialer(this@LockService) }
-                catch (e: Exception) { android.util.Log.w("FocusLock", "Could not open phone", e) }
-            }
-        })
         val params = WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -144,7 +135,6 @@ class LockService : Service() {
             if (remaining <= 0 || !ready()) { stopSelf(); return }
             val calling = PhoneAccess.inCall(this@LockService)
             if (wasInCall && !calling) {
-                PhoneAccess.dialerUntil = 0
                 PhoneAccess.foregroundPackage = null
             }
             wasInCall = calling
