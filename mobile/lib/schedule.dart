@@ -44,8 +44,9 @@ class ScheduleStore {
   Future<void> save(List<FocusSchedule> items) async {
     final prefs = await SharedPreferences.getInstance();
     if (!await prefs.setString('focus_schedules_v1',
-        jsonEncode(items.map((item) => item.toJson()).toList())))
+        jsonEncode(items.map((item) => item.toJson()).toList()))) {
       throw StateError('Could not save schedules');
+    }
   }
 }
 
@@ -53,6 +54,16 @@ class PhoneLock {
   static bool get supported =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
   static const channel = MethodChannel('focuslock/phone_lock');
+  static const requiredPermissions = [
+    'overlay',
+    'exact',
+    'phone',
+    'dnd',
+    'accessibility',
+    'notifications'
+  ];
+  static bool ready(Map<String, dynamic> permissions) =>
+      requiredPermissions.every((key) => permissions[key] == true);
   static Future<Map<String, dynamic>> permissions() async => supported
       ? Map<String, dynamic>.from(
           await channel.invokeMethod('permissions') as Map)
@@ -60,9 +71,10 @@ class PhoneLock {
   static Future<void> request(String permission) =>
       channel.invokeMethod('request', permission);
   static Future<void> schedule(FocusSchedule item, String language) async {
-    if (supported)
+    if (supported) {
       await channel
           .invokeMethod('schedule', {...item.toJson(), 'language': language});
+    }
   }
 
   static Future<void> cancel(String id) async {

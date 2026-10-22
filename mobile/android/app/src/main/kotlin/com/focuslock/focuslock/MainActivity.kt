@@ -16,18 +16,26 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         ScheduleEngine.restore(this)
+        LockSession.recover(this)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "focuslock/phone_lock").setMethodCallHandler { call, result ->
             try {
                 when (call.method) {
                     "permissions" -> result.success(mapOf(
                         "overlay" to Settings.canDrawOverlays(this),
                         "exact" to ScheduleEngine.allowed(this),
+                        "phone" to PhoneAccess.permitted(this),
+                        "dnd" to QuietMode.allowed(this),
+                        "dndSupported" to QuietMode.supported(),
+                        "accessibility" to AppGuardService.connected,
                         "notifications" to getSystemService(NotificationManager::class.java).areNotificationsEnabled()
                     ))
                     "request" -> {
                         when (call.arguments as String) {
                             "overlay" -> startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
                             "exact" -> if (Build.VERSION.SDK_INT >= 31) startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName")))
+                            "phone" -> requestPermissions(arrayOf(Manifest.permission.READ_PHONE_STATE), 13)
+                            "dnd" -> startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                            "accessibility" -> startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                             "notifications" -> if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 12)
                         }

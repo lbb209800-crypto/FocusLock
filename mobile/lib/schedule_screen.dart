@@ -41,14 +41,16 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     try {
       final items = await _store.load();
       final permissions = await PhoneLock.permissions();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _items = items;
           _permissions = permissions;
         });
+      }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         _message(context.tr('Could not load schedules.', '저장된 일정을 불러오지 못했어요.'));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -60,8 +62,15 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   }
 
   Future<void> _refreshPermissions() async {
-    final permissions = await PhoneLock.permissions();
-    if (mounted) setState(() => _permissions = permissions);
+    try {
+      final permissions = await PhoneLock.permissions();
+      if (mounted) setState(() => _permissions = permissions);
+    } catch (_) {
+      if (mounted) {
+        _message(
+            context.tr('Could not check permissions.', '권한 상태를 확인하지 못했어요.'));
+      }
+    }
   }
 
   @override
@@ -108,6 +117,16 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     final language = LanguageScope.of(context).code;
     setState(() => _saving = true);
     try {
+      if (PhoneLock.supported) {
+        final permissions = await PhoneLock.permissions();
+        if (!mounted) return;
+        setState(() => _permissions = permissions);
+        if (!PhoneLock.ready(permissions)) {
+          _message(context.tr('Allow all lock permissions before registering.',
+              '일정 등록 전에 잠금에 필요한 권한을 모두 허용해주세요.'));
+          return;
+        }
+      }
       await PhoneLock.schedule(item, language);
       final next = [..._items, item]..sort((a, b) => a.at.compareTo(b.at));
       try {
@@ -120,9 +139,11 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       setState(() => _items = next);
       _message(context.tr('Schedule saved.', '일정을 등록했어요.'));
     } catch (_) {
-      if (mounted)
-        _message(context.tr('Check overlay and exact alarm permissions.',
-            '등록하지 못했어요. 다른 앱 위에 표시·정확한 알람 권한을 확인해주세요.'));
+      if (mounted) {
+        _message(context.tr(
+            'Could not register. Check lock permissions and the FocusLock Do Not Disturb rule.',
+            '등록하지 못했어요. 잠금 권한과 FocusLock 방해금지 규칙을 확인해주세요.'));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -136,8 +157,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       await _store.save(next);
       if (mounted) setState(() => _items = next);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         _message(context.tr('Could not remove schedule.', '일정을 삭제하지 못했어요.'));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -220,12 +242,36 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                               'Web preview: keep this tab open. Device-wide blocking requires Android.',
                               '웹 미리보기: 이 탭을 열어두세요. 다른 앱까지 차단하려면 Android 앱이 필요해요.')))),
                 if (PhoneLock.supported) ...[
+                  Text(
+                      PhoneLock.ready(_permissions)
+                          ? context.tr('Lock permissions ready', '잠금 권한 준비 완료')
+                          : context.tr('Lock setup required', '잠금 권한 설정이 필요해요'),
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(context.tr(
+                      'Calls remain available. During calls the lock screen is hidden; the original end time stays the same.',
+                      '전화가 오면 잠금 화면을 숨겨요. 통화 후에도 원래 잠금 종료 시각은 유지돼요.')),
+                  if (_permissions['dndSupported'] == false)
+                    Text(context.tr(
+                        'Notification restriction requires Android 10 or later.',
+                        '알림 제한이 포함된 예약 잠금은 Android 10 이상에서 사용할 수 있어요.')),
                   _permissionTile('overlay',
                       context.tr('Display over other apps', '다른 앱 위에 표시')),
                   _permissionTile(
                       'exact', context.tr('Alarms & reminders', '알람 및 리마인더')),
                   _permissionTile(
                       'notifications', context.tr('Notifications', '알림')),
+                  _permissionTile(
+                      'phone',
+                      context.tr('Phone state for call exceptions',
+                          '전화 예외를 위한 통화 상태')),
+                  _permissionTile(
+                      'dnd',
+                      context.tr(
+                          'Do Not Disturb access', '일반 알림 제한을 위한 방해금지 접근')),
+                  _permissionTile(
+                      'accessibility',
+                      context.tr(
+                          'App blocking (Accessibility)', '앱 이동 제한 (접근성)')),
                 ],
                 const SizedBox(height: 20),
                 TextField(
@@ -247,8 +293,9 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                             initialDate: _date,
                             firstDate: DateTime(now.year, now.month, now.day),
                             lastDate: now.add(const Duration(days: 365)));
-                        if (date != null && mounted)
+                        if (date != null && mounted) {
                           setState(() => _date = date);
+                        }
                       }),
                   OutlinedButton.icon(
                       icon: const Icon(Icons.schedule),
@@ -256,15 +303,17 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                       onPressed: () async {
                         final time = await showTimePicker(
                             context: context, initialTime: _time);
-                        if (time != null && mounted)
+                        if (time != null && mounted) {
                           setState(() => _time = time);
+                        }
                       }),
                 ]),
                 const SizedBox(height: 20),
                 Text(context.tr('Lock duration', '잠금 시간')),
                 const SizedBox(height: 8),
                 Text(context.tr('10 minutes', '10분'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 FilledButton.icon(
                     onPressed: _saving ? null : () => _add(),
@@ -324,8 +373,38 @@ class _ScheduleScreenState extends State<ScheduleScreen>
             ? null
             : TextButton(
                 onPressed: () async {
-                  await PhoneLock.request(key);
-                  await _refreshPermissions();
+                  if (key == 'accessibility') {
+                    final accepted = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                              title:
+                                  Text(context.tr('App blocking', '앱 이동 제한')),
+                              content: Text(context.tr(
+                                  'During a scheduled lock, FocusLock detects app switches and returns to the focus screen. It does not read screen content or typed text. Calls and system settings remain available. You can turn this off in Android Accessibility Settings.',
+                                  '예약 잠금 중 앱 전환을 감지해 집중 화면으로 돌아옵니다. 화면 내용이나 입력한 글자는 읽지 않습니다. 전화와 시스템 설정은 사용할 수 있으며 Android 접근성 설정에서 언제든 해제할 수 있어요.')),
+                              actions: [
+                                TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(dialogContext, false),
+                                    child: Text(context.tr('Cancel', '취소'))),
+                                FilledButton(
+                                    onPressed: () =>
+                                        Navigator.pop(dialogContext, true),
+                                    child: Text(
+                                        context.tr('Open settings', '설정 열기'))),
+                              ],
+                            ));
+                    if (accepted != true || !mounted) return;
+                  }
+                  try {
+                    await PhoneLock.request(key);
+                    await _refreshPermissions();
+                  } catch (_) {
+                    if (mounted) {
+                      _message(context.tr('Could not open permission settings.',
+                          '권한 설정을 열지 못했어요.'));
+                    }
+                  }
                 },
                 child: Text(context.tr('Allow', '허용'))),
       );

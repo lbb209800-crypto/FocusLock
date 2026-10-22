@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <application
         android:label="FocusLock"
         android:name="${applicationName}"
@@ -35,6 +37,20 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User scheduled temporary focus overlay with countdown" />
         </service>
         <receiver android:name=".ScheduleReceiver" android:exported="false" />
+        <receiver android:name=".LockExpiryReceiver" android:exported="false" />
+        <service android:name=".AppGuardService" android:label="@string/focus_guard_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/focus_accessibility" />
+        </service>
+        <service android:name=".FocusConditionService" android:label="FocusLock"
+            android:permission="android.permission.BIND_CONDITION_PROVIDER_SERVICE" android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.ConditionProviderService" />
+            </intent-filter>
+        </service>
         <receiver android:name=".RestoreReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

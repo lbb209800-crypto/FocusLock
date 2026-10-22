@@ -19,10 +19,23 @@ object ScheduleEngine {
     fun register(c: Context, item: JSONObject) {
         require(allowed(c)) { "Exact alarm permission required" }
         require(android.provider.Settings.canDrawOverlays(c)) { "Overlay permission required" }
+        require(PhoneAccess.permitted(c)) { "Phone state permission required" }
+        require(QuietMode.allowed(c)) { "Android 10+ and Do Not Disturb access required" }
+        require(AppGuardService.connected) { "Enable FocusLock app blocking in Accessibility Settings" }
+        require(c.getSystemService(android.app.NotificationManager::class.java).areNotificationsEnabled()) { "Notification permission required" }
         require(item.getString("title").isNotBlank() && item.getString("title").length <= 100)
         require(item.getInt("minutes") == 10)
         require(item.getLong("at") > System.currentTimeMillis())
         val id = item.getString("id")
+        for ((savedId, value) in prefs(c).all) {
+            if (savedId == id) continue
+            val saved = JSONObject(value as String)
+            require(item.getLong("at") >= LockSession.end(saved) || saved.getLong("at") >= LockSession.end(item)) {
+                "Lock overlaps another schedule"
+            }
+        }
+        // Check/create the inactive owned rule now, not for the first time at lock start.
+        QuietMode.prepare(c)
         check(prefs(c).edit().putString(id, item.toString()).commit())
         try { arm(c, item) } catch (e: Exception) { prefs(c).edit().remove(id).commit(); throw e }
     }
@@ -32,6 +45,10 @@ object ScheduleEngine {
     fun cancel(c: Context, id: String) {
         alarm(c).cancel(pending(c, id))
         check(prefs(c).edit().remove(id).commit())
+        if (LockSession.active(c)?.optString("id") == id) {
+            LockSession.finish(c)
+            c.stopService(Intent(c, LockService::class.java))
+        }
     }
     fun find(c: Context, id: String): JSONObject? = prefs(c).getString(id, null)?.let { JSONObject(it) }
     fun restore(c: Context) {
@@ -61,5 +78,10 @@ class ScheduleReceiver : BroadcastReceiver() {
 }
 
 class RestoreReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) { ScheduleEngine.restore(context) }
+    override fun onReceive(context: Context, intent: Intent) {
+        // Boot cannot start special-use foreground services on recent Android versions.
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED) LockSession.finish(context)
+        else LockSession.recover(context)
+        ScheduleEngine.restore(context)
+    }
 }

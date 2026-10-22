@@ -26,7 +26,7 @@ does not grant a fresh ten minutes.
 
 ## Android implementation
 
-Android 8+ native code uses `AlarmManager.setExactAndAllowWhileIdle`, a foreground
+Android native code uses `AlarmManager.setExactAndAllowWhileIdle`, a foreground
 service and a touch-consuming `TYPE_APPLICATION_OVERLAY` window. The schedule
 time, title and countdown appear over ordinary app windows. There is no dismiss
 button. Back events received by the overlay are consumed; the overlay removes
@@ -39,6 +39,10 @@ Install Android SDK/Java, connect an Android device with USB debugging, then run
 **Display over other apps** and **Alarms & reminders**; allow notifications to see
 the ongoing service. Register a fifteen-second test and switch to another app.
 The overlay should appear after fifteen seconds and remain for ten minutes.
+New scheduling with notification restrictions requires Android 10+ and all six
+permissions shown in the app: overlay, exact alarms, notifications, phone state,
+Do Not Disturb access, and the FocusLock accessibility service. Android 8/9 can
+install the app but cannot register this combined lock flow.
 Check normal registration, cancellation, reboot, app restart, missing permissions,
 and automatic expiry on a physical device before relying on this feature.
 
@@ -56,14 +60,63 @@ blocking is not implemented.
 
 ## Verification in this workspace
 
-Four Flutter tests cover deadline boundaries, local persistence/deletion, title
-registration/preview/language, and scheduled activation/expiry after a reload.
-The new Dart source passed type/error analysis. Android SDK and an Android device
-were unavailable here, so native Kotlin/APK compilation and real overlay behavior
-have **not** been verified. The Android code is a first implementation, not a
-tested phone build.
+Six Flutter tests cover deadline boundaries, local persistence/deletion, title
+registration/preview/language, activation/expiry after reload, required permission
+readiness, and Android registration being withheld until permissions are granted.
+Native unit tests cover the deadline during calls and guard exemptions. Build and
+test results for the current change are recorded in HANDOFF.md. Physical-device
+overlay, telephony and notification behavior remains **unverified**.
+
+## App switching, calls and notifications
+
+- `AppGuardService` listens only to window/package transitions. It returns ordinary
+  apps/launchers to FocusLock while a lock is active. It cannot read the view tree,
+  typed text or notification contents. The app explains this before opening the
+  Android accessibility settings; enabling it is the user's choice.
+- Phone/Telecom/emergency UI, Android Settings, keyguard and System UI remain
+  available. This is a stronger deterrent, not kiosk mode or a guarantee against
+  force stop, uninstall, navigation, permission revocation or OEM restrictions.
+- `TelecomManager.isInCall` checks aggregate ringing/ongoing calls, including
+  secondary SIMs. A phone-state receiver yields immediately; the service also
+  polls. Unknown/unreadable call state yields rather than obstructing the phone.
+  No phone numbers, contacts, call log or audio are read.
+- The overlay hides during a call and resumes after it, using the original
+  deadline. A call lasting beyond the deadline finishes the lock. Phone UI can
+  also be opened with the overlay's phone button; leaving the phone returns to
+  app blocking. Phone/Settings exemptions are deliberate escape paths.
+- On Android 10+, `QuietMode` owns one `AutomaticZenRule` with a `ZenPolicy` that
+  suppresses ordinary notification sound/vibration/visual effects and allows all
+  calls. Alarms/media remain allowed. It does not delete notifications or change
+  global DND settings. Existing stricter user rules can still silence calls, and
+  DND-bypassing/system alerts may remain visible/audible. Modified/disabled rules
+  are respected. There is no notification-listener/cancellation workaround.
+- Deadline expiry, normal service teardown, cancellation, and boot recovery
+  release only FocusLock's rule. An independent exact expiry alarm cleans up even
+  after process death. Force stop can prevent alarm delivery: if needed disable
+  the FocusLock rule in Android's DND settings or reopen the app to recover.
+
+## Required physical-device checks
+
+1. Grant every permission; deny/revoke each individually and confirm registration
+   is refused or an active overlay stops without blocking system controls.
+2. Schedule a test, switch to an ordinary app, press Home/Recents and open the
+   notification shade. Record which transitions are actually prevented per device.
+3. Receive, reject and answer a real call during a lock, including a secondary SIM.
+   Test a call already ringing at lock start, a call longer than the remaining lock,
+   and outbound calling. Verify emergency dialer access without placing a test
+   emergency call. Check overlay removal and original-deadline resumption.
+4. Send real ordinary notifications with sound/vibration enabled before the lock.
+   Check banner, lock screen and shade behavior; compare with DND bypass enabled.
+5. Test an existing user DND rule, stricter call policy, silent mode, user edits to
+   the FocusLock rule, expiry while on a call, process kill, reboot and force stop.
+   Confirm the user's settings persist after FocusLock ends.
+6. Repeat on Android 10 and Android 15+ and the target manufacturer's phone.
 
 Official references:
 - https://developer.android.com/develop/background-work/services/alarms
 - https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
 - https://developer.android.com/develop/background-work/services/fgs/service-types#special-use
+- https://developer.android.com/reference/android/accessibilityservice/AccessibilityService
+- https://developer.android.com/reference/android/telecom/TelecomManager#isInCall()
+- https://developer.android.com/reference/android/app/AutomaticZenRule
+- https://developer.android.com/reference/android/service/notification/ZenPolicy.Builder

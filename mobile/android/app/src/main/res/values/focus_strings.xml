@@ -1,0 +1,4 @@
+<resources>
+    <string name="focus_guard_label">FocusLock app blocking</string>
+    <string name="focus_guard_description">During a scheduled lock, FocusLock detects app switches and returns to the focus screen. It does not read screen content or collect typed text. Phone calls and system settings remain available. You can disable this service in Android Settings.</string>
+</resources>
