@@ -21,7 +21,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   DateTime _date = DateTime.now();
   TimeOfDay _time =
       TimeOfDay.fromDateTime(DateTime.now().add(const Duration(minutes: 1)));
-  int _minutes = 5;
+  static const _minutes = 10;
   bool _loading = true;
   bool _saving = false;
   DateTime? _demoEnd;
@@ -95,7 +95,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     }
     if (_items.any((item) =>
         at.isBefore(item.endsAt) &&
-        item.at.isBefore(at.add(Duration(minutes: _minutes))))) {
+        item.at.isBefore(at.add(const Duration(minutes: _minutes))))) {
       _message(context.tr(
           'This lock overlaps another schedule.', '다른 일정의 잠금 시간과 겹쳐요.'));
       return;
@@ -263,19 +263,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 const SizedBox(height: 20),
                 Text(context.tr('Lock duration', '잠금 시간')),
                 const SizedBox(height: 8),
-                SegmentedButton<int>(
-                    segments: [
-                      ButtonSegment(
-                          value: 5, label: Text(context.tr('5 minutes', '5분'))),
-                      ButtonSegment(
-                          value: 10,
-                          label: Text(context.tr('10 minutes', '10분')))
-                    ],
-                    selected: {
-                      _minutes
-                    },
-                    onSelectionChanged: (value) =>
-                        setState(() => _minutes = value.first)),
+                Text(context.tr('10 minutes', '10분'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 FilledButton.icon(
                     onPressed: _saving ? null : () => _add(),

@@ -13,16 +13,16 @@ $env:PUB_CACHE = "$PWD\..\.tools\pub-cache"
 ..\.tools\flutter\bin\flutter.bat run -d chrome --web-port 8084
 ```
 
-Enter a title, choose a date/time and a five- or ten-minute lock. Schedules are
+Enter a title, choose a date/time for a fixed ten-minute lock. Schedules are
 one-time appointments, not daily repeats. Past times and overlapping lock windows
-are rejected. The fifteen-second scheduling test uses the selected production
+are rejected. The fifteen-second scheduling test uses the ten-minute production
 lock duration. The separate fifteen-second screen preview ends after fifteen
 seconds and does not create an appointment.
 
 The browser version only covers the app page while it is open. Browser tabs,
 closing the browser, and other applications cannot be blocked. Background tabs
 may be throttled. The countdown derives from the original deadline, so reload
-does not grant a fresh five or ten minutes.
+does not grant a fresh ten minutes.
 
 ## Android implementation
 
@@ -38,7 +38,7 @@ Install Android SDK/Java, connect an Android device with USB debugging, then run
 `flutter run -d <device-id>` from `mobile/`. In the app, explicitly grant
 **Display over other apps** and **Alarms & reminders**; allow notifications to see
 the ongoing service. Register a fifteen-second test and switch to another app.
-The overlay should appear after fifteen seconds and remain for five/ten minutes.
+The overlay should appear after fifteen seconds and remain for ten minutes.
 Check normal registration, cancellation, reboot, app restart, missing permissions,
 and automatic expiry on a physical device before relying on this feature.
 

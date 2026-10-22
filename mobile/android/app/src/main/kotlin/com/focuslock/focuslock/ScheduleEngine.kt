@@ -20,7 +20,7 @@ object ScheduleEngine {
         require(allowed(c)) { "Exact alarm permission required" }
         require(android.provider.Settings.canDrawOverlays(c)) { "Overlay permission required" }
         require(item.getString("title").isNotBlank() && item.getString("title").length <= 100)
-        require(item.getInt("minutes") in listOf(5, 10))
+        require(item.getInt("minutes") == 10)
         require(item.getLong("at") > System.currentTimeMillis())
         val id = item.getString("id")
         check(prefs(c).edit().putString(id, item.toString()).commit())
